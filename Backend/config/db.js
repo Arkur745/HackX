@@ -1,9 +1,10 @@
 // config/database.js
 import mongoose from 'mongoose';
+import { MONGO_DB_URI } from './env.js';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    const conn = await mongoose.connect(MONGO_DB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
