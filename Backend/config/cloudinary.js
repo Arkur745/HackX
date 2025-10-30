@@ -47,6 +47,7 @@ export const uploadToCloudinary = (fileBuffer, folder) => {
       {
         resource_type: "auto", // Automatically detect file type (pdf, image, etc.)
         folder: folder,
+        access_mode: "public",
       },
       (error, result) => {
         if (error) {

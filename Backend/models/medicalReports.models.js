@@ -1,12 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const medicalReportSchema = new mongoose.Schema(
   {
     userId: {
-      // type: mongoose.Schema.Types.ObjectId, // <-- Original
-      // ref: 'User', // <-- Original
-
-      type: mongoose.Schema.Types.Mixed, // <-- CHANGED for testing
+      type: String, // Changed to String for Clerk user IDs
       required: [true, "User ID is required"],
       index: true,
     },
@@ -33,4 +30,4 @@ const medicalReportSchema = new mongoose.Schema(
 // Index for efficient user report retrieval
 medicalReportSchema.index({ userId: 1, createdAt: -1 });
 
-export default mongoose.model('MedicalReport', medicalReportSchema);
+export default mongoose.model("MedicalReport", medicalReportSchema);

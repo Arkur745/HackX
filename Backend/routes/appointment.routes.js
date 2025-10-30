@@ -3,26 +3,35 @@ import {
   bookAppointment,
   getAppointmentsForUser,
   cancelAppointment,
+  deleteAppointment,
 } from "../controllers/appointmentController.js";
-
-// TODO: Import your Clerk middleware
-// import { requireAuth } from "@clerk/clerk-sdk-node";
+import { requireAuth } from "../middleware/clerk.middleware.js";
 
 const router = express.Router();
 
-// @route   POST /api/appointments/book
-// This route is for the detailed web form
-// We add requireAuth to protect this route
-router.post("/book", /* requireAuth, */ bookAppointment);
+// @route   GET /api/appointments
+// @desc    Gets all appointments for the authenticated user
+// @access  Protected
+router.get("/", requireAuth, getAppointmentsForUser);
 
-// @route   GET /api/appointments/user
-// Gets all appointments for a user
-// NOTE: For testing, you'll need to pass userId in the params.
-// In production, your controller will get it from Clerk (req.auth.userId)
-router.get("/user/:userId", /* requireAuth, */ getAppointmentsForUser);
+// @route   POST /api/appointments/book
+// @desc    Book a new appointment
+// @access  Protected
+router.post("/book", requireAuth, bookAppointment);
+
+// @route   GET /api/appointments/user/:userId
+// @desc    Gets all appointments for a user (deprecated - use GET / instead)
+// @access  Protected
+router.get("/user/:userId", requireAuth, getAppointmentsForUser);
 
 // @route   PUT /api/appointments/cancel/:appointmentId
-// Cancels a specific appointment
-router.put("/cancel/:appointmentId", /* requireAuth, */ cancelAppointment);
+// @desc    Cancels a specific appointment
+// @access  Protected
+router.put("/cancel/:appointmentId", requireAuth, cancelAppointment);
+
+// @route   DELETE /api/appointments/:appointmentId
+// @desc    Delete/cancel a specific appointment
+// @access  Protected
+router.delete("/:appointmentId", requireAuth, deleteAppointment);
 
 export default router;

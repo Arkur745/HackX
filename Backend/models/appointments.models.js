@@ -2,10 +2,9 @@ import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema(
   {
-    // CORRECTED: Changed 'patientId' to 'userId'
+    // Clerk userId is a string, not a MongoDB ObjectId
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: [true, "User ID is required"],
       index: true,
     },
