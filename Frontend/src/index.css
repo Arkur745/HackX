@@ -6,32 +6,32 @@
    ============================================ */
 
 :root {
-  /* Light Mode Colors */
-  --color-background: 255 255 255; /* white */
-  --color-foreground: 0 0 0; /* black */
-  --color-card: 255 255 255;
+  /* Light Mode Colors - MindTrack Style */
+  --color-background: 255 255 255; /* pure white background */
+  --color-foreground: 0 0 0; /* black text */
+  --color-card: 255 255 255; /* white cards */
   --color-card-foreground: 0 0 0;
-  --color-primary: 0 0 0;
-  --color-primary-foreground: 255 255 255;
-  --color-secondary: 245 245 245; /* gray-100 */
+  --color-primary: 0 0 0; /* black primary */
+  --color-primary-foreground: 255 255 255; /* white text on primary */
+  --color-secondary: 245 245 245; /* gray-100 for subtle backgrounds */
   --color-secondary-foreground: 0 0 0;
-  --color-muted: 245 245 245;
+  --color-muted: 245 245 245; /* gray-100 */
   --color-muted-foreground: 115 115 115; /* gray-500 */
   --color-accent: 229 229 229; /* gray-200 */
   --color-accent-foreground: 0 0 0;
-  --color-border: 212 212 212; /* gray-300 */
-  --color-input: 229 229 229;
+  --color-border: 229 229 229; /* gray-200 - subtle border */
+  --color-input: 255 255 255; /* white inputs */
   --color-ring: 0 0 0;
 
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-shadow: rgba(0, 0, 0, 0.05);
+  /* Glassmorphism - Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.06);
 
-  /* Gradient Stops */
-  --gradient-from: 245 245 245; /* gray-100 */
-  --gradient-via: 255 255 255; /* white */
-  --gradient-to: 229 229 229; /* gray-200 */
+  /* Gradient Stops - Light Mode */
+  --gradient-from: 255 255 255; /* white */
+  --gradient-via: 250 250 250; /* very light gray */
+  --gradient-to: 245 245 245; /* gray-100 */
 }
 
 .dark {
@@ -48,7 +48,7 @@
   --color-muted-foreground: 163 163 163; /* gray-400 */
   --color-accent: 64 64 64; /* gray-700 */
   --color-accent-foreground: 255 255 255;
-  --color-border: 64 64 64;
+  --color-border: 39 39 42; /* zinc-800 - subtle dark border like landing page */
   --color-input: 38 38 38;
   --color-ring: 255 255 255;
 
@@ -78,9 +78,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: rgb(var(--color-background));
+  background: rgb(var(--color-background));
   color: rgb(var(--color-foreground));
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* MindTrack-style radial gradient for light mode */
+body:not(.dark) {
+  background: radial-gradient(circle at center, #fafafa 0%, #ffffff 100%);
 }
 
 html {
@@ -391,19 +396,34 @@ html {
   box-shadow: 0 0 0 3px rgba(var(--color-ring), 0.1);
 }
 
+/* Card Component - Seamless, No Borders */
 .card {
   background-color: rgb(var(--color-card));
   color: rgb(var(--color-card-foreground));
   border-radius: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 1.5rem;
   transition: all 0.3s ease;
-  border: 1px solid rgb(var(--color-border) / 0.5);
+  border: none; /* Removed all borders */
+}
+
+/* Seamless dark mode card with depth */
+.dark .card {
+  background-color: rgb(10, 10, 10); /* Deep black for depth */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5),
+    0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 .modal-overlay {

@@ -12,15 +12,8 @@ const Reports = () => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     loadReports();
-  }, [navigate]);
+  }, []);
 
   const loadReports = async () => {
     setLoading(true);
@@ -111,22 +104,22 @@ const Reports = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4 pb-8">
+    <div className="min-h-screen bg-background pt-20 px-4 pb-8 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-foreground mb-2">
             Medical Reports
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Upload and manage your medical reports. Get AI-powered explanations
             in simple language.
           </p>
         </div>
 
         {/* Upload Section */}
-        <div className="card mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="bg-card shadow-soft rounded-xl p-6 mb-8 transition-all duration-300">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
             Upload New Report
           </h2>
 
@@ -141,7 +134,7 @@ const Reports = () => {
                 className="input-field"
               />
               {selectedFile && (
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Selected: {selectedFile.name} (
                   {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
@@ -186,14 +179,14 @@ const Reports = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-4">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="mt-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded">
+              <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
             </div>
           )}
 
           {/* File Format Info */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600">
+          <div className="mt-4 p-3 bg-secondary/30 rounded-lg transition-colors duration-300">
+            <p className="text-xs text-muted-foreground">
               <strong>Supported formats:</strong> PDF, JPG, JPEG, PNG (Max 10MB)
             </p>
           </div>
@@ -201,20 +194,20 @@ const Reports = () => {
 
         {/* Reports List */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-semibold text-foreground mb-6">
             Your Reports
           </h2>
 
           {loading ? (
-            <div className="card text-center py-12">
-              <div className="animate-spin h-10 w-10 border-4 border-black border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading reports...</p>
+            <div className="bg-card shadow-soft rounded-xl p-6 text-center py-12 transition-all duration-300">
+              <div className="animate-spin h-10 w-10 border-4 border-foreground border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading reports...</p>
             </div>
           ) : reports.length === 0 ? (
-            <div className="card text-center py-12">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-card shadow-soft rounded-xl p-6 text-center py-12 transition-all duration-300">
+              <div className="w-20 h-20 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
                 <svg
-                  className="w-10 h-10 text-gray-400"
+                  className="w-10 h-10 text-muted-foreground"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -225,10 +218,10 @@ const Reports = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 No Reports Yet
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Upload your first medical report to get started
               </p>
             </div>

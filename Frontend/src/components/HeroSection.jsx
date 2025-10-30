@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Bot } from "lucide-react";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { Button } from "./ui/Button";
 
 const HeroSection = () => {
@@ -32,24 +33,40 @@ const HeroSection = () => {
 
       {/* CTA Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-fade-in">
-        <Button
-          variant="default"
-          size="lg"
-          onClick={() => navigate("/dashboard")}
-          className="group font-semibold text-base bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100"
-        >
-          Start Chatting
-          <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-        </Button>
+        <SignedIn>
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => navigate("/dashboard")}
+            className="group font-semibold text-base bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100"
+          >
+            Go to Dashboard
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </SignedIn>
 
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => navigate("/login")}
-          className="font-semibold text-base border-2 border-gray-300 dark:border-white/20 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10"
-        >
-          Sign In / Register
-        </Button>
+        <SignedOut>
+          <SignInButton mode="modal" redirectUrl="/dashboard">
+            <Button
+              variant="default"
+              size="lg"
+              className="group font-semibold text-base bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100"
+            >
+              Start Chatting
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </SignInButton>
+
+          <SignInButton mode="modal">
+            <Button
+              variant="outline"
+              size="lg"
+              className="font-semibold text-base border-2 border-gray-300 dark:border-white/20 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10"
+            >
+              Sign In / Register
+            </Button>
+          </SignInButton>
+        </SignedOut>
       </div>
 
       {/* Floating Elements for Visual Interest */}

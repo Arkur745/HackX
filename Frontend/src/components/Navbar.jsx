@@ -1,24 +1,22 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { authAPI } from "../services/api";
+import { Link, useLocation } from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
-  const isLoggedIn = localStorage.getItem("authToken");
-
-  const handleLogout = async () => {
-    await authAPI.logout();
-    navigate("/login");
-  };
 
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
     { path: "/", label: "Home" },
-    { path: "/dashboard", label: "Dashboard", protected: true },
-    { path: "/reports", label: "Reports", protected: true },
+    { path: "/dashboard", label: "Dashboard" },
+    { path: "/reports", label: "Reports" },
   ];
 
   return (
@@ -50,39 +48,39 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {navLinks.map((link) => {
-              if (link.protected && !isLoggedIn) return null;
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`text-sm font-medium transition-all duration-300 hover:text-foreground ${
-                    isActive(link.path)
-                      ? "text-foreground border-b-2 border-foreground pb-1"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            {/* Auth Button */}
-            {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95 shadow-md"
-              >
-                Logout
-              </button>
-            ) : (
+            {navLinks.map((link) => (
               <Link
-                to="/login"
-                className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95 shadow-md"
+                key={link.path}
+                to={link.path}
+                className={`text-sm font-medium transition-all duration-300 hover:text-foreground ${
+                  isActive(link.path)
+                    ? "text-foreground border-b-2 border-foreground pb-1"
+                    : "text-muted-foreground"
+                }`}
               >
-                Login
+                {link.label}
               </Link>
-            )}
+            ))}
+
+            {/* Clerk Auth Components */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95 shadow-md">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10",
+                  },
+                }}
+              />
+            </SignedIn>
           </div>
 
           {/* Mobile Menu Button */}
@@ -120,43 +118,43 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200/50 dark:border-white/10 backdrop-blur-lg">
             <div className="flex flex-col space-y-4">
-              {navLinks.map((link) => {
-                if (link.protected && !isLoggedIn) return null;
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`px-4 py-2 rounded-lg transition-all duration-200 ${
-                      isActive(link.path)
-                        ? "bg-black dark:bg-white text-white dark:text-black"
-                        : "text-muted-foreground hover:bg-gray-100 dark:hover:bg-white/10"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90"
-                >
-                  Logout
-                </button>
-              ) : (
+              {navLinks.map((link) => (
                 <Link
-                  to="/login"
+                  key={link.path}
+                  to={link.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90"
+                  className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isActive(link.path)
+                      ? "bg-black dark:bg-white text-white dark:text-black"
+                      : "text-muted-foreground hover:bg-gray-100 dark:hover:bg-white/10"
+                  }`}
                 >
-                  Login
+                  {link.label}
                 </Link>
-              )}
+              ))}
+
+              {/* Clerk Auth Components for Mobile */}
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+
+              <SignedIn>
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Account</span>
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-10 h-10",
+                      },
+                    }}
+                  />
+                </div>
+              </SignedIn>
             </div>
           </div>
         )}

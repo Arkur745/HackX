@@ -30,9 +30,12 @@ A modern, minimalist React-based frontend for a digital health assistant applica
 ### 📅 Appointment Scheduling
 
 - Easy appointment booking form
+- **🎤 Voice-based appointment booking** - Speak naturally to book appointments
+- Intelligent natural language processing
 - Date and time selection
 - Department and doctor preferences
 - Appointment management (view, cancel)
+- Smart date parsing (tomorrow, next Monday, etc.)
 
 ### 🔐 User Authentication
 

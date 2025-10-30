@@ -1,17 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { authAPI } from "../services/api";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
 const LandingNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("authToken");
-
-  const handleLogout = async () => {
-    await authAPI.logout();
-    navigate("/login");
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/90 dark:bg-black/50 border-b border-gray-200/50 dark:border-white/10 transition-colors duration-300">
@@ -41,22 +39,31 @@ const LandingNavbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Auth Button */}
-            {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95"
+            {/* Clerk Auth Components */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <Link
+                to="/dashboard"
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Logout
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate("/login")}
-                className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90 active:scale-95"
-              >
-                Sign In
-              </button>
-            )}
+                Dashboard
+              </Link>
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10",
+                  },
+                }}
+              />
+            </SignedIn>
           </div>
 
           {/* Mobile Menu Button */}
@@ -76,27 +83,34 @@ const LandingNavbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200/50 dark:border-white/10 animate-fade-in">
             <div className="flex flex-col space-y-3">
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90"
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90">
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+
+              <SignedIn>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2 text-center bg-secondary rounded-lg text-foreground hover:bg-accent transition-colors"
                 >
-                  Logout
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    navigate("/login");
-                    setIsMenuOpen(false);
-                  }}
-                  className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium transition-all duration-300 hover:opacity-90"
-                >
-                  Sign In
-                </button>
-              )}
+                  Dashboard
+                </Link>
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Account</span>
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-10 h-10",
+                      },
+                    }}
+                  />
+                </div>
+              </SignedIn>
             </div>
           </div>
         )}

@@ -13,12 +13,19 @@ const api = axios.create({
   timeout: 30000, // 30 seconds
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add Clerk auth token
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    // Try to get Clerk token if available
+    try {
+      // This will be set by Clerk when user is authenticated
+      // You can also use window.Clerk.session.getToken() if needed
+      const clerkToken = await window.Clerk?.session?.getToken();
+      if (clerkToken) {
+        config.headers.Authorization = `Bearer ${clerkToken}`;
+      }
+    } catch (error) {
+      console.log("No Clerk token available:", error);
     }
     return config;
   },
@@ -32,24 +39,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
-      localStorage.removeItem("authToken");
-      window.location.href = "/login";
+      // Unauthorized - Clerk will handle redirect
+      console.error("Unauthorized request - please sign in");
     }
     return Promise.reject(error);
   }
 );
 
 // ===================
-// User/Auth APIs
+// User/Auth APIs (Legacy - Clerk handles auth now)
 // ===================
 export const authAPI = {
-  login: (credentials) => api.post("/users/login", credentials),
-  register: (userData) => api.post("/users/register", userData),
-  logout: () => {
-    localStorage.removeItem("authToken");
-    return Promise.resolve();
-  },
+  // These are kept for backward compatibility but not used
+  // Clerk handles all authentication
   getCurrentUser: () => api.get("/users/me"),
 };
 

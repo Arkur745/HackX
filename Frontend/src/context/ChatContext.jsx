@@ -75,9 +75,16 @@ export const ChatProvider = ({ children }) => {
       };
       setMessages((prev) => [...prev, userMessage]);
 
+      // If no conversation exists, create one
+      let conversationId = currentConversation;
+      if (!conversationId) {
+        const newConv = await createNewConversation();
+        conversationId = newConv?.id;
+      }
+
       // Send to backend
       const response = await chatAPI.sendMessage({
-        conversationId: currentConversation,
+        conversationId,
         message: messageText,
         isVoice,
       });
@@ -90,6 +97,37 @@ export const ChatProvider = ({ children }) => {
         timestamp: response.data.timestamp || new Date().toISOString(),
       };
       setMessages((prev) => [...prev, botMessage]);
+
+      // Update conversation title if it's the first message
+      if (messages.length === 0) {
+        const title =
+          messageText.slice(0, 50) + (messageText.length > 50 ? "..." : "");
+        setConversations((prev) =>
+          prev.map((conv) =>
+            conv.id === conversationId
+              ? {
+                  ...conv,
+                  title,
+                  lastMessage: messageText,
+                  updatedAt: new Date().toISOString(),
+                }
+              : conv
+          )
+        );
+      } else {
+        // Update last message and timestamp
+        setConversations((prev) =>
+          prev.map((conv) =>
+            conv.id === conversationId
+              ? {
+                  ...conv,
+                  lastMessage: messageText,
+                  updatedAt: new Date().toISOString(),
+                }
+              : conv
+          )
+        );
+      }
 
       return botMessage;
     } catch (err) {
@@ -113,12 +151,21 @@ export const ChatProvider = ({ children }) => {
   const createNewConversation = async () => {
     try {
       setLoading(true);
-      const response = await chatAPI.createConversation();
-      const newConversation = response.data;
+
+      // For demo purposes, create a local conversation
+      const newConversation = {
+        id: `conv-${Date.now()}`,
+        title: "New Conversation",
+        lastMessage: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
       setConversations((prev) => [newConversation, ...prev]);
       setCurrentConversation(newConversation.id);
       setMessages([]);
       setError(null);
+
       return newConversation;
     } catch (err) {
       console.error("Error creating conversation:", err);
@@ -170,4 +217,6 @@ export const ChatProvider = ({ children }) => {
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
 
-export default ChatContext;
+// Don't export the context as default - export the provider instead
+// This ensures React Fast Refresh works properly
+export default ChatProvider;

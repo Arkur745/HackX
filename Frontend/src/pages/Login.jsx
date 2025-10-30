@@ -2,6 +2,16 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 
+/**
+ * LOGIN COMPONENT - DEMO MODE
+ *
+ * TEMPORARY: Authentication is currently bypassed for development.
+ * Any email and password combination will be accepted.
+ *
+ * TODO: Re-enable proper authentication by uncommenting the API calls
+ * in the handleSubmit function and removing the bypass logic.
+ */
+
 const Login = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
@@ -28,49 +38,53 @@ const Login = () => {
     setError(null);
     setLoading(true);
 
+    // TEMPORARY: Bypass authentication - accept any credentials
     try {
       if (isLogin) {
-        // Login
-        const response = await authAPI.login({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        // Store auth token
-        if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token);
+        // Login - accept any credentials
+        if (!formData.email || !formData.password) {
+          setError("Please enter email and password");
+          setLoading(false);
+          return;
         }
+
+        // Store a mock auth token
+        localStorage.setItem("authToken", "demo-token-" + Date.now());
+        localStorage.setItem("userEmail", formData.email);
+
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Redirect to dashboard
         navigate("/dashboard");
       } else {
-        // Register
+        // Register - accept any credentials
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match");
           setLoading(false);
           return;
         }
 
-        const response = await authAPI.register({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
-
-        // Store auth token
-        if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token);
+        if (!formData.email || !formData.password || !formData.name) {
+          setError("Please fill in all fields");
+          setLoading(false);
+          return;
         }
+
+        // Store a mock auth token
+        localStorage.setItem("authToken", "demo-token-" + Date.now());
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("userName", formData.name);
+
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Redirect to dashboard
         navigate("/dashboard");
       }
     } catch (err) {
       console.error("Auth error:", err);
-      setError(
-        err.response?.data?.message ||
-          `Failed to ${isLogin ? "login" : "register"}. Please try again.`
-      );
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -88,16 +102,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center px-4 py-20 transition-colors duration-300">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="card">
+        <div className="glass-strong rounded-3xl p-8 shadow-hard border border-border/20">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               {isLogin ? "Welcome Back" : "Create Account"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               {isLogin
                 ? "Sign in to access your health dashboard"
                 : "Join us to start managing your health better"}
@@ -106,8 +120,8 @@ const Login = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="mb-6 bg-red-500/10 border-l-4 border-red-500 p-4 rounded-lg">
+              <p className="text-red-500 text-sm">{error}</p>
             </div>
           )}
 
@@ -118,7 +132,7 @@ const Login = () => {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground mb-2"
                 >
                   Full Name
                 </label>
@@ -139,7 +153,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 Email Address
               </label>
@@ -159,7 +173,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-foreground mb-2"
               >
                 Password
               </label>
@@ -181,7 +195,7 @@ const Login = () => {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground mb-2"
                 >
                   Confirm Password
                 </label>
@@ -239,11 +253,11 @@ const Login = () => {
 
           {/* Toggle Mode */}
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 onClick={toggleMode}
-                className="text-black font-semibold hover:underline transition-all duration-200"
+                className="text-foreground font-semibold hover:underline transition-all duration-200"
               >
                 {isLogin ? "Sign Up" : "Sign In"}
               </button>
@@ -254,7 +268,7 @@ const Login = () => {
           <div className="mt-4 text-center">
             <Link
               to="/"
-              className="text-gray-500 text-sm hover:text-black transition-colors duration-200"
+              className="text-muted-foreground text-sm hover:text-foreground transition-colors duration-200"
             >
               ← Back to Home
             </Link>
@@ -262,9 +276,10 @@ const Login = () => {
         </div>
 
         {/* Demo Credentials (for testing) */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <p className="text-xs text-gray-600 text-center">
-            <strong>Demo:</strong> email@test.com / password123
+        <div className="mt-6 p-4 glass rounded-xl border border-border/20 shadow-soft">
+          <p className="text-xs text-muted-foreground text-center">
+            <strong className="text-foreground">Demo Mode:</strong> Enter any
+            email and password to access the app
           </p>
         </div>
       </div>

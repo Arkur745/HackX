@@ -1,8 +1,11 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 import LandingNavbar from "../components/LandingNavbar";
 import HeroSection from "../components/HeroSection";
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors duration-300">
       <LandingNavbar />
@@ -149,19 +152,34 @@ const Home = () => {
             Join thousands using AI-powered health assistance to understand
             their medical reports and make informed healthcare decisions.
           </p>
-          <Link
-            to="/login"
-            className="inline-block px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-semibold 
-                     text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl 
-                     active:scale-95"
-          >
-            Get Started Now
-          </Link>
+
+          <SignedIn>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="inline-block px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-semibold 
+                       text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl 
+                       active:scale-95"
+            >
+              Go to Dashboard
+            </button>
+          </SignedIn>
+
+          <SignedOut>
+            <SignInButton mode="modal" redirectUrl="/dashboard">
+              <button
+                className="inline-block px-8 py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-semibold 
+                         text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl 
+                         active:scale-95"
+              >
+                Get Started Now
+              </button>
+            </SignInButton>
+          </SignedOut>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 bg-black dark:bg-zinc-950 text-gray-400 border-t border-gray-800 dark:border-zinc-800 transition-colors duration-300">
+      <footer className="py-8 px-4 bg-white dark:bg-zinc-950 text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-zinc-800 transition-colors duration-300">
         <div className="max-w-6xl mx-auto text-center">
           <p>&copy; 2025 HealthAI. All rights reserved.</p>
         </div>
