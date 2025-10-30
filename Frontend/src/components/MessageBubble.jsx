@@ -9,26 +9,47 @@ const MessageBubble = ({ message, sender, timestamp, isVoice }) => {
 
   return (
     <div
-      className={`flex ${
+      className={`group flex ${
         isUser ? "justify-end" : "justify-start"
       } mb-4 animate-fade-in`}
     >
+      {/* Bot Avatar */}
+      {!isUser && (
+        <div className="shrink-0 mr-3">
+          <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-soft">
+            <svg
+              className="w-5 h-5 text-foreground"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        </div>
+      )}
+
       <div
-        className={`max-w-[70%] sm:max-w-[60%] rounded-2xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
+        className={`max-w-[75%] sm:max-w-[70%] ${
           isUser
-            ? "bg-white text-black border border-gray-200"
-            : "bg-black text-white"
-        }`}
+            ? "bg-foreground text-background rounded-2xl px-4 py-3 shadow-md"
+            : "bg-white/5 dark:bg-white/5 backdrop-blur-sm border border-white/10 text-foreground rounded-2xl px-4 py-3 shadow-soft"
+        } transition-all duration-300 group-hover:shadow-lg`}
       >
         {/* Message Text */}
-        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
+        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap wrap-break-word">
           {message}
         </p>
 
         {/* Timestamp and Voice Indicator */}
         <div
           className={`flex items-center gap-2 mt-2 text-xs ${
-            isUser ? "text-gray-500" : "text-gray-400"
+            isUser ? "text-background/70" : "text-muted-foreground"
           }`}
         >
           <span>{time}</span>
@@ -46,6 +67,15 @@ const MessageBubble = ({ message, sender, timestamp, isVoice }) => {
           )}
         </div>
       </div>
+
+      {/* User Avatar */}
+      {isUser && (
+        <div className="shrink-0 ml-3">
+          <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shadow-md">
+            <span className="text-background text-sm font-semibold">You</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -136,16 +136,18 @@ const VoiceInput = ({ onTranscript, onError, language = "en-US" }) => {
 
       {/* Real-time Transcript Display */}
       {(transcript || interimTranscript) && (
-        <div className="w-full max-w-md p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <p className="text-sm text-gray-800">
+        <div className="w-full max-w-md p-4 bg-secondary rounded-xl border border-border transition-colors duration-300">
+          <p className="text-sm text-foreground">
             <span className="font-medium">{transcript}</span>
-            <span className="text-gray-500 italic">{interimTranscript}</span>
+            <span className="text-muted-foreground italic">
+              {interimTranscript}
+            </span>
           </p>
         </div>
       )}
 
       {/* Status Text */}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         {isListening ? "Listening..." : "Click to start recording"}
       </p>
     </div>

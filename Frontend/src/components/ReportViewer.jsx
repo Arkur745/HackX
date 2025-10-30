@@ -37,14 +37,14 @@ const ReportViewer = ({ report }) => {
   };
 
   return (
-    <div className="card">
+    <div className="bg-card shadow-soft rounded-xl p-6 transition-all duration-300">
       {/* Report Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-xl font-semibold text-gray-900 mb-1">
+          <h3 className="text-xl font-semibold text-foreground mb-1">
             {report.title || "Medical Report"}
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             {new Date(report.date || report.createdAt).toLocaleDateString(
               "en-US",
               {
@@ -58,7 +58,7 @@ const ReportViewer = ({ report }) => {
 
         {/* Report Type Badge */}
         {report.type && (
-          <span className="px-3 py-1 bg-black text-white text-xs rounded-full">
+          <span className="px-3 py-1 bg-foreground text-background text-xs rounded-full">
             {report.type}
           </span>
         )}
@@ -66,15 +66,15 @@ const ReportViewer = ({ report }) => {
 
       {/* Report Description */}
       {report.description && (
-        <p className="text-gray-700 mb-4 leading-relaxed">
+        <p className="text-foreground mb-4 leading-relaxed">
           {report.description}
         </p>
       )}
 
       {/* Report Details */}
       {report.details && (
-        <div className="bg-gray-50 rounded-xl p-4 mb-4">
-          <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
+        <div className="bg-secondary/30 rounded-xl p-4 mb-4 transition-colors duration-300">
+          <pre className="text-sm text-foreground whitespace-pre-wrap font-mono">
             {report.details}
           </pre>
         </div>
@@ -82,14 +82,14 @@ const ReportViewer = ({ report }) => {
 
       {/* Language Selector */}
       <div className="flex items-center gap-4 mb-4">
-        <label className="text-sm font-medium text-gray-700">Language:</label>
+        <label className="text-sm font-medium text-foreground">Language:</label>
         <div className="flex gap-2">
           <button
             onClick={() => setLanguage("en")}
             className={`px-3 py-1 rounded-lg text-sm transition-all duration-200 ${
               language === "en"
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-foreground text-background"
+                : "bg-secondary text-foreground hover:bg-secondary/80"
             }`}
           >
             English
@@ -98,8 +98,8 @@ const ReportViewer = ({ report }) => {
             onClick={() => setLanguage("hi")}
             className={`px-3 py-1 rounded-lg text-sm transition-all duration-200 ${
               language === "hi"
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-foreground text-background"
+                : "bg-secondary text-foreground hover:bg-secondary/80"
             }`}
           >
             हिंदी
@@ -169,17 +169,17 @@ const ReportViewer = ({ report }) => {
           onClick={() => setShowExplanation(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+            className="bg-card shadow-soft rounded-xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto transition-all duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Simple Explanation
               </h2>
               <button
                 onClick={() => setShowExplanation(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="p-2 hover:bg-secondary/50 rounded-lg transition-colors duration-200"
               >
                 <svg
                   className="w-6 h-6"
@@ -199,7 +199,7 @@ const ReportViewer = ({ report }) => {
 
             {/* Explanation Content */}
             <div className="prose max-w-none mb-6">
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                 {explanation}
               </p>
             </div>

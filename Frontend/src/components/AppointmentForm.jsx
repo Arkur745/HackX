@@ -85,7 +85,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Full Name *
         </label>
@@ -106,7 +106,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             Email *
           </label>
@@ -125,7 +125,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
         <div>
           <label
             htmlFor="phone"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             Phone Number
           </label>
@@ -146,7 +146,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
         <div>
           <label
             htmlFor="date"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             Preferred Date *
           </label>
@@ -165,7 +165,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
         <div>
           <label
             htmlFor="time"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             Preferred Time *
           </label>
@@ -185,7 +185,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor="department"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Department *
         </label>
@@ -210,7 +210,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor="doctor"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Preferred Doctor (Optional)
         </label>
@@ -229,7 +229,7 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
       <div>
         <label
           htmlFor="notes"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Additional Notes
         </label>
