@@ -7,3 +7,4 @@ export { default as VoiceInput } from "./VoiceInput";
 export { default as AppointmentForm } from "./AppointmentForm";
 export { default as ReportViewer } from "./ReportViewer";
 export { default as LoadingSpinner } from "./LoadingSpinner";
+export { default as ThemeToggle } from "./ThemeToggle";

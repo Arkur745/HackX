@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Sun, Moon } from "lucide-react";
 import { authAPI } from "../services/api";
-import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const isLoggedIn = localStorage.getItem("authToken");
@@ -69,19 +66,6 @@ const Navbar = () => {
                 </Link>
               );
             })}
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300"
-              aria-label="Toggle theme"
-            >
-              {isDark ? (
-                <Sun className="h-5 w-5 text-foreground" />
-              ) : (
-                <Moon className="h-5 w-5 text-foreground" />
-              )}
-            </button>
 
             {/* Auth Button */}
             {isLoggedIn ? (
@@ -153,24 +137,6 @@ const Navbar = () => {
                   </Link>
                 );
               })}
-
-              {/* Mobile Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-black dark:text-white transition-all duration-300 flex items-center gap-2 w-full"
-              >
-                {isDark ? (
-                  <>
-                    <Sun className="h-5 w-5" />
-                    <span>Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-5 w-5" />
-                    <span>Dark Mode</span>
-                  </>
-                )}
-              </button>
 
               {isLoggedIn ? (
                 <button

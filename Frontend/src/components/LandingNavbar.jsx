@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X } from "lucide-react";
-import { Button } from "./ui/Button";
+import { Menu, X } from "lucide-react";
 import { authAPI } from "../services/api";
-import { useTheme } from "../context/ThemeContext";
 
 const LandingNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("authToken");
 
@@ -44,19 +41,6 @@ const LandingNavbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300"
-              aria-label="Toggle theme"
-            >
-              {isDark ? (
-                <Sun className="h-5 w-5 text-black dark:text-white" />
-              ) : (
-                <Moon className="h-5 w-5 text-black dark:text-white" />
-              )}
-            </button>
-
             {/* Auth Button */}
             {isLoggedIn ? (
               <button
@@ -92,23 +76,6 @@ const LandingNavbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200/50 dark:border-white/10 animate-fade-in">
             <div className="flex flex-col space-y-3">
-              <button
-                onClick={toggleTheme}
-                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-black dark:text-white transition-all duration-300 flex items-center gap-2 w-full"
-              >
-                {isDark ? (
-                  <>
-                    <Sun className="h-5 w-5" />
-                    Light Mode
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-5 w-5" />
-                    Dark Mode
-                  </>
-                )}
-              </button>
-
               {isLoggedIn ? (
                 <button
                   onClick={() => {
