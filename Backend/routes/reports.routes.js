@@ -4,6 +4,7 @@ import {
   getReports,
   deleteReport,
   explainReport,
+  downloadReport,
 } from "../controllers/reportController.js";
 import { uploadReportMiddleware } from "../middleware/multer.middleware.js";
 import { requireAuth } from "../middleware/clerk.middleware.js";
@@ -39,5 +40,12 @@ router.post("/explain", requireAuth, explainReport);
  * @access  Protected (requires authentication)
  */
 router.delete("/:reportId", requireAuth, deleteReport);
+
+/**
+ * @route   GET /api/reports/download/:reportId
+ * @desc    Download a medical report with proper filename
+ * @access  Protected (requires authentication)
+ */
+router.get("/download/:reportId", requireAuth, downloadReport);
 
 export default router;

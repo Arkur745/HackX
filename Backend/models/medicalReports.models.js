@@ -17,6 +17,11 @@ const medicalReportSchema = new mongoose.Schema(
       required: [true, "Report URL is required"],
       trim: true,
     },
+    publicId: {
+      type: String,
+      trim: true,
+      // Cloudinary public_id for generating proper download URLs
+    },
     summary: {
       type: String,
       trim: true,

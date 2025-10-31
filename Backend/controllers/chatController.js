@@ -6,6 +6,40 @@ import { getSTMContext, addToSTM, getRecentContext } from "../storage/stm.js";
 import { generateResponse } from "../utils/shivaayAPI.js";
 // import { textToSpeech } from "../utils/tts.js"; // optional
 
+/**
+ * Helper function to clean markdown formatting from text
+ * Removes # (headers) and * (bold/italic) markers while preserving spacing and paragraphs
+ */
+const cleanMarkdown = (text) => {
+  if (!text) return text;
+
+  return (
+    text
+      // Remove header markers (# ## ### etc.) but keep the text on new line
+      .replace(/^#{1,6}\s+/gm, "")
+      // Remove bold markers (**text** or __text__)
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      // Remove italic markers (*text* or _text_)
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/_(.+?)_/g, "$1")
+      // Remove inline code markers (`text`)
+      .replace(/`(.+?)`/g, "$1")
+      // Remove horizontal rules (--- or ***)
+      .replace(/^[-*_]{3,}\s*$/gm, "")
+      // Clean up any remaining standalone * or #
+      .replace(/[\*#]/g, "")
+      // Normalize line breaks - replace multiple newlines with double newline (paragraph)
+      .replace(/\n{3,}/g, "\n\n")
+      // Clean up spaces at the end of lines
+      .replace(/[ \t]+$/gm, "")
+      // Clean up multiple spaces on the same line (but preserve single spaces)
+      .replace(/[ \t]{2,}/g, " ")
+      // Trim whitespace from start and end
+      .trim()
+  );
+};
+
 export const sendMessage = async (req, res) => {
   try {
     // Get userId from Clerk middleware (req.userId is set by requireAuth)
@@ -48,11 +82,14 @@ export const sendMessage = async (req, res) => {
     await addToSTM(convId, userId, "user", messageText);
 
     // Generate LLM reply with context + medical summary
-    const assistantText = await generateResponse(
+    const rawAssistantText = await generateResponse(
       messageText,
       stmContext,
       medicalSummary
     );
+
+    // Clean markdown formatting from the AI response
+    const assistantText = cleanMarkdown(rawAssistantText);
 
     // Persist assistant reply
     await addToSTM(convId, userId, "assistant", assistantText);

@@ -1,7 +1,75 @@
 import MedicalReport from "../models/medicalReports.models.js";
 import { generateResponse } from "../utils/shivaayAPI.js";
-import { uploadToCloudinary } from "../config/cloudinary.js";
+import {
+  uploadToCloudinary,
+  generateDownloadUrl,
+} from "../config/cloudinary.js";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
+/**
+ * Helper function to ensure filename has .pdf extension without duplication
+ */
+const ensurePdfExtension = (filename) => {
+  if (!filename) return "report.pdf";
+
+  // Check if filename already ends with .pdf (case insensitive)
+  if (filename.toLowerCase().endsWith(".pdf")) {
+    return filename;
+  }
+
+  return `${filename}.pdf`;
+};
+
+/**
+ * Helper function to get download URL for Cloudinary raw files (PDFs)
+ * Uses Cloudinary's attachment flag to ensure proper filename on download
+ */
+const getDownloadUrl = (cloudinaryUrl, publicId, filename) => {
+  if (!cloudinaryUrl || !publicId) return cloudinaryUrl;
+
+  // Ensure the filename has .pdf extension without duplication
+  const properFilename = ensurePdfExtension(filename);
+
+  // Use the generateDownloadUrl function to create a proper download link
+  // with Content-Disposition: attachment header
+  const downloadUrl = generateDownloadUrl(publicId, properFilename);
+
+  console.log("🔗 Download URL generated for:", properFilename);
+  return downloadUrl;
+};
+/**
+ * Helper function to clean markdown formatting from text
+ * Removes # (headers) and * (bold/italic) markers while preserving spacing and paragraphs
+ */
+const cleanMarkdown = (text) => {
+  if (!text) return text;
+
+  return (
+    text
+      // Remove header markers (# ## ### etc.) but keep the text on new line
+      .replace(/^#{1,6}\s+/gm, "")
+      // Remove bold markers (**text** or __text__)
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      // Remove italic markers (*text* or _text_)
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/_(.+?)_/g, "$1")
+      // Remove inline code markers (`text`)
+      .replace(/`(.+?)`/g, "$1")
+      // Remove horizontal rules (--- or ***)
+      .replace(/^[-*_]{3,}\s*$/gm, "")
+      // Clean up any remaining standalone * or #
+      .replace(/[\*#]/g, "")
+      // Normalize line breaks - replace multiple newlines with double newline (paragraph)
+      .replace(/\n{3,}/g, "\n\n")
+      // Clean up spaces at the end of lines
+      .replace(/[ \t]+$/gm, "")
+      // Clean up multiple spaces on the same line (but preserve single spaces)
+      .replace(/[ \t]{2,}/g, " ")
+      // Trim whitespace from start and end
+      .trim()
+  );
+};
 
 /**
  * @desc    Upload a new medical report, parse it, summarize, and save
@@ -79,7 +147,20 @@ export const uploadReport = async (req, res) => {
     // --- 2. Upload Original PDF to Cloudinary ---
     let uploadResult;
     try {
-      uploadResult = await uploadToCloudinary(file.buffer, "medical_reports");
+      // Use reportName from request body, or fallback to original filename
+      const filename = reportName || file.originalname;
+
+      console.log("📤 Preparing to upload PDF:");
+      console.log("   - Filename:", filename);
+      console.log("   - Buffer size:", file.buffer?.length || 0, "bytes");
+      console.log("   - Original name:", file.originalname);
+      console.log("   - MIME type:", file.mimetype);
+
+      uploadResult = await uploadToCloudinary(
+        file.buffer,
+        "medical_reports",
+        filename
+      );
     } catch (uploadError) {
       console.error("Cloudinary Upload Error:", uploadError);
       return res.status(500).json({ error: "Failed to upload file." });
@@ -93,7 +174,9 @@ export const uploadReport = async (req, res) => {
 
     let summary = "";
     try {
-      summary = await generateResponse(summaryPrompt);
+      const rawSummary = await generateResponse(summaryPrompt);
+      // Clean markdown formatting from the AI response
+      summary = cleanMarkdown(rawSummary);
     } catch (aiError) {
       console.error("AI Summary Error:", aiError);
       summary = "AI summary failed. Please review the document manually.";
@@ -104,14 +187,28 @@ export const uploadReport = async (req, res) => {
       userId: userId,
       reportName: reportName || file.originalname,
       reportUrl: uploadResult.secure_url,
+      publicId: uploadResult.public_id, // Save the Cloudinary public_id
       summary: summary,
     });
 
     await newReport.save();
 
+    // Use backend download endpoint instead of direct Cloudinary URL
+    const fileUrl = `/api/reports/download/${newReport._id}`;
+
     res.status(201).json({
       message: "Report uploaded and summarized successfully!",
-      report: newReport,
+      report: {
+        id: newReport._id,
+        fileName: newReport.reportName,
+        reportName: newReport.reportName,
+        reportUrl: newReport.reportUrl,
+        fileUrl: fileUrl, // Backend proxy download URL
+        summary: newReport.summary,
+        uploadDate: newReport.createdAt,
+        createdAt: newReport.createdAt,
+        updatedAt: newReport.updatedAt,
+      },
     });
   } catch (err) {
     console.error("❌ uploadReport error:", err);
@@ -145,17 +242,22 @@ export const getReports = async (req, res) => {
       .lean();
 
     // Format the response to match frontend expectations
-    const formattedReports = reports.map((report) => ({
-      id: report._id,
-      fileName: report.reportName,
-      reportName: report.reportName,
-      reportUrl: report.reportUrl,
-      fileUrl: report.reportUrl, // Added for ReportViewer "View Original" button
-      summary: report.summary,
-      uploadDate: report.createdAt,
-      createdAt: report.createdAt,
-      updatedAt: report.updatedAt,
-    }));
+    const formattedReports = reports.map((report) => {
+      // Use backend download endpoint instead of direct Cloudinary URL
+      const fileUrl = `/api/reports/download/${report._id}`;
+
+      return {
+        id: report._id,
+        fileName: report.reportName,
+        reportName: report.reportName,
+        reportUrl: report.reportUrl,
+        fileUrl: fileUrl, // Backend proxy download URL
+        summary: report.summary,
+        uploadDate: report.createdAt,
+        createdAt: report.createdAt,
+        updatedAt: report.updatedAt,
+      };
+    });
 
     res.status(200).json(formattedReports);
   } catch (err) {
@@ -257,7 +359,9 @@ Keep the explanation conversational and easy to understand, as if talking to a f
 
     let explanation = "";
     try {
-      explanation = await generateResponse(explanationPrompt);
+      const rawExplanation = await generateResponse(explanationPrompt);
+      // Clean markdown formatting from the AI response
+      explanation = cleanMarkdown(rawExplanation);
     } catch (aiError) {
       console.error("AI Explanation Error:", aiError);
       return res.status(500).json({
@@ -272,6 +376,64 @@ Keep the explanation conversational and easy to understand, as if talking to a f
     });
   } catch (err) {
     console.error("❌ explainReport error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @desc    Download a report with proper Content-Disposition headers
+ * @route   GET /api/reports/download/:reportId
+ * @access  Private (requires Clerk authentication)
+ */
+export const downloadReport = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { reportId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!reportId) {
+      return res.status(400).json({ error: "Report ID is required" });
+    }
+
+    // Find the report and verify ownership
+    const report = await MedicalReport.findOne({ _id: reportId, userId });
+
+    if (!report) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    // Fetch the file from Cloudinary
+    const fetch = (await import("node-fetch")).default;
+    const response = await fetch(report.reportUrl);
+
+    if (!response.ok) {
+      console.error("Failed to fetch from Cloudinary:", response.statusText);
+      return res.status(500).json({ error: "Failed to download file" });
+    }
+
+    // Get the file buffer
+    const buffer = await response.buffer();
+
+    // Ensure proper filename with .pdf extension
+    const filename = ensurePdfExtension(report.reportName);
+
+    console.log(`📥 Download request for report: ${report.reportName}`);
+    console.log(`📝 Final filename: ${filename}`);
+
+    // Set headers to force download with proper filename
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Length", buffer.length);
+
+    // Send the file
+    res.send(buffer);
+
+    console.log(`✅ Downloaded report: ${filename}`);
+  } catch (err) {
+    console.error("❌ downloadReport error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
