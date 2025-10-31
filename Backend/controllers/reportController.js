@@ -405,8 +405,7 @@ export const downloadReport = async (req, res) => {
       return res.status(404).json({ error: "Report not found" });
     }
 
-    // Fetch the file from Cloudinary
-    const fetch = (await import("node-fetch")).default;
+    // Fetch the file from Cloudinary using native fetch (Node 18+)
     const response = await fetch(report.reportUrl);
 
     if (!response.ok) {
@@ -415,7 +414,8 @@ export const downloadReport = async (req, res) => {
     }
 
     // Get the file buffer
-    const buffer = await response.buffer();
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     // Ensure proper filename with .pdf extension
     const filename = ensurePdfExtension(report.reportName);
