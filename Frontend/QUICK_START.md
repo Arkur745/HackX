@@ -1,4 +1,4 @@
-# Quick Start Guide - Health AI Frontend
+# Quick Start Guide - HealX.ai Frontend
 
 ## 🚀 Running the Application
 
@@ -193,4 +193,4 @@ Open an issue on GitHub or contact the development team.
 
 ---
 
-**Enjoy building with Health AI! 🏥💬🎤**
+**Enjoy building with HealX.ai! 🏥💬🎤**

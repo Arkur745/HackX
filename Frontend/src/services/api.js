@@ -63,14 +63,13 @@ export const chatAPI = {
   getConversations: () => api.get("/chat/conversations"),
 
   // Get messages for a specific conversation
-  getMessages: (conversationId) =>
-    api.get(`/chat/conversations/${conversationId}/messages`),
+  getMessages: (conversationId) => api.get(`/chat/messages/${conversationId}`),
 
   // Send a message (text or voice)
-  sendMessage: (data) => api.post("/chat/message", data),
+  sendMessage: (data) => api.post("/chat/send", data),
 
   // Create new conversation
-  createConversation: () => api.post("/chat/conversations"),
+  createConversation: () => api.post("/chat/start"),
 
   // Delete conversation
   deleteConversation: (conversationId) =>
@@ -86,7 +85,7 @@ export const appointmentAPI = {
 
   // Create new appointment
   createAppointment: (appointmentData) =>
-    api.post("/appointments", appointmentData),
+    api.post("/appointments/book", appointmentData),
 
   // Update appointment
   updateAppointment: (id, appointmentData) =>
@@ -125,6 +124,13 @@ export const reportAPI = {
 
   // Delete report
   deleteReport: (reportId) => api.delete(`/reports/${reportId}`),
+
+  // Download report with proper blob handling
+  downloadReport: (reportId) => {
+    return api.get(`/reports/download/${reportId}`, {
+      responseType: "blob", // Important: treat response as binary data
+    });
+  },
 };
 
 // ===================

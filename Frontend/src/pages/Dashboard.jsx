@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatBox from "../components/ChatBox";
 import AppointmentForm from "../components/AppointmentForm";
+import Toast from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 import { appointmentAPI, reportAPI } from "../services/api";
 
 const Dashboard = () => {
@@ -13,6 +15,14 @@ const Dashboard = () => {
   const [uploadingReport, setUploadingReport] = useState(false);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
   const fileInputRef = useRef(null);
+  const {
+    toasts,
+    showToast,
+    removeToast,
+    success,
+    error: errorToast,
+    info,
+  } = useToast();
 
   useEffect(() => {
     // Load appointments when tab is active
@@ -70,18 +80,21 @@ const Dashboard = () => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Please upload a valid file format (PDF, JPG, PNG, DOC, or DOCX)");
+      errorToast(
+        "Please upload a valid file format (PDF, JPG, PNG, DOC, or DOCX)"
+      );
       return;
     }
 
     // Validate file size (max 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > maxSize) {
-      alert("File size must be less than 10MB");
+      errorToast("File size must be less than 10MB");
       return;
     }
 
     setUploadingReport(true);
+    info("Uploading report...");
 
     try {
       const formData = new FormData();
@@ -93,7 +106,7 @@ const Dashboard = () => {
       // Add the new report to the list
       setReports((prev) => [response.data, ...prev]);
 
-      alert("Report uploaded successfully!");
+      success("Report uploaded and analyzed successfully!");
 
       // Reset file input
       if (fileInputRef.current) {
@@ -101,7 +114,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error("Error uploading report:", err);
-      alert(
+      errorToast(
         err.response?.data?.message ||
           "Failed to upload report. Please try again."
       );
@@ -118,17 +131,19 @@ const Dashboard = () => {
     try {
       await reportAPI.deleteReport(reportId);
       setReports((prev) => prev.filter((report) => report.id !== reportId));
-      alert("Report deleted successfully!");
+      success("Report deleted successfully!");
     } catch (err) {
       console.error("Error deleting report:", err);
-      alert("Failed to delete report. Please try again.");
+      errorToast("Failed to delete report. Please try again.");
     }
   };
 
-  const handleAppointmentSuccess = (newAppointment) => {
+  const handleAppointmentSuccess = (responseData) => {
+    // responseData contains { message, appointment }
+    const newAppointment = responseData.appointment || responseData;
     setAppointments((prev) => [newAppointment, ...prev]);
     setShowAppointmentForm(false);
-    alert("Appointment scheduled successfully!");
+    success("Appointment scheduled successfully!");
   };
 
   const handleDeleteAppointment = async (id) => {
@@ -139,9 +154,49 @@ const Dashboard = () => {
     try {
       await appointmentAPI.deleteAppointment(id);
       setAppointments((prev) => prev.filter((apt) => apt.id !== id));
+      success("Appointment cancelled successfully!");
     } catch (err) {
       console.error("Error deleting appointment:", err);
-      alert("Failed to cancel appointment. Please try again.");
+      errorToast("Failed to cancel appointment. Please try again.");
+    }
+  };
+
+  /**
+   * Handle report download with custom notifications
+   */
+  const handleDownloadReport = async (report) => {
+    info(`Downloading ${report.reportName}...`);
+
+    try {
+      // Fetch the file from the backend
+      const response = await reportAPI.downloadReport(report.id);
+
+      // Create a blob from the response
+      const blob = new Blob([response.data], { type: "application/pdf" });
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Set filename with .pdf extension
+      const filename = report.reportName.toLowerCase().endsWith(".pdf")
+        ? report.reportName
+        : `${report.reportName}.pdf`;
+      link.download = filename;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      success(`${report.reportName} downloaded successfully!`);
+    } catch (err) {
+      console.error("Error downloading report:", err);
+      errorToast("Failed to download report. Please try again.");
     }
   };
 
@@ -328,29 +383,28 @@ const Dashboard = () => {
                           </div>
 
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                /* TODO: View report details */
-                              }}
-                              className="text-blue-500 hover:text-blue-700 transition-colors duration-200 p-2"
-                              aria-label="View report"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
+                            {report.fileUrl && (
+                              <button
+                                onClick={() => handleDownloadReport(report)}
+                                className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-200 p-2"
+                                aria-label="Download report"
                               >
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </button>
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            )}
                             <button
                               onClick={() => handleDeleteReport(report.id)}
-                              className="text-red-500 hover:text-red-700 transition-colors duration-200 p-2"
+                              className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors duration-200 p-2"
                               aria-label="Delete report"
                             >
                               <svg
@@ -514,6 +568,19 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            duration={toast.duration}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
       </div>
     </div>
   );

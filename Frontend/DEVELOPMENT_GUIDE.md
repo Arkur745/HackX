@@ -1,4 +1,4 @@
-# Development Guide - Health AI Frontend
+# Development Guide - HealX.ai Frontend
 
 ## 🎓 For Developers
 

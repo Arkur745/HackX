@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ReportViewer from "../components/ReportViewer";
+import Toast from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 import { reportAPI } from "../services/api";
 
 const Reports = () => {
@@ -10,6 +12,14 @@ const Reports = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const {
+    toasts,
+    showToast,
+    removeToast,
+    success,
+    error: errorToast,
+    info,
+  } = useToast();
 
   useEffect(() => {
     loadReports();
@@ -20,6 +30,8 @@ const Reports = () => {
     setError(null);
     try {
       const response = await reportAPI.getReports();
+      console.log("📋 Reports loaded:", response.data);
+      console.log("📋 First report fileUrl:", response.data?.[0]?.fileUrl);
       setReports(response.data || []);
     } catch (err) {
       console.error("Error loading reports:", err);
@@ -40,28 +52,30 @@ const Reports = () => {
         "image/jpg",
       ];
       if (!validTypes.includes(file.type)) {
-        alert("Please select a valid file (PDF or Image)");
+        errorToast("Please select a valid file (PDF or Image)");
         return;
       }
 
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert("File size should be less than 10MB");
+        errorToast("File size should be less than 10MB");
         return;
       }
 
       setSelectedFile(file);
+      info(`Selected: ${file.name}`);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert("Please select a file first");
+      errorToast("Please select a file first");
       return;
     }
 
     setUploading(true);
     setError(null);
+    info("Uploading report...");
 
     try {
       const formData = new FormData();
@@ -77,9 +91,13 @@ const Reports = () => {
       setSelectedFile(null);
       document.getElementById("fileInput").value = "";
 
-      alert("Report uploaded successfully!");
+      success("Report uploaded and analyzed successfully!");
     } catch (err) {
       console.error("Error uploading report:", err);
+      errorToast(
+        err.response?.data?.message ||
+          "Failed to upload report. Please try again."
+      );
       setError(
         err.response?.data?.message ||
           "Failed to upload report. Please try again."
@@ -97,9 +115,49 @@ const Reports = () => {
     try {
       await reportAPI.deleteReport(reportId);
       setReports((prev) => prev.filter((r) => r.id !== reportId));
+      success("Report deleted successfully");
     } catch (err) {
       console.error("Error deleting report:", err);
-      alert("Failed to delete report. Please try again.");
+      errorToast("Failed to delete report. Please try again.");
+    }
+  };
+
+  /**
+   * Handle report download with custom notifications
+   */
+  const handleDownloadReport = async (report) => {
+    info(`Downloading ${report.reportName}...`);
+
+    try {
+      // Fetch the file from the backend
+      const response = await reportAPI.downloadReport(report.id);
+
+      // Create a blob from the response
+      const blob = new Blob([response.data], { type: "application/pdf" });
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Set filename with .pdf extension
+      const filename = report.reportName.toLowerCase().endsWith(".pdf")
+        ? report.reportName
+        : `${report.reportName}.pdf`;
+      link.download = filename;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      success(`${report.reportName} downloaded successfully!`);
+    } catch (err) {
+      console.error("Error downloading report:", err);
+      errorToast("Failed to download report. Please try again.");
     }
   };
 
@@ -229,32 +287,78 @@ const Reports = () => {
             <div className="space-y-6">
               {reports.map((report) => (
                 <div key={report.id} className="relative">
-                  <ReportViewer report={report} />
+                  {console.log(
+                    `Report ${report.id} has fileUrl:`,
+                    report.fileUrl
+                  )}
+                  <ReportViewer
+                    report={report}
+                    onDownload={handleDownloadReport}
+                    showToast={showToast}
+                  />
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDeleteReport(report.id)}
-                    className="absolute top-4 right-4 p-2 text-red-500 hover:text-red-700 
-                             hover:bg-red-50 rounded-lg transition-all duration-200"
-                    aria-label="Delete report"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                  {/* Action Buttons Container */}
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    {/* Download Button */}
+                    {report.fileUrl && (
+                      <button
+                        onClick={() => handleDownloadReport(report)}
+                        className="p-2 text-blue-500 hover:text-blue-700 
+                                 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-all duration-200"
+                        aria-label="Download report"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    )}
+
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => handleDeleteReport(report.id)}
+                      className="p-2 text-red-500 hover:text-red-700 
+                               hover:bg-red-50 rounded-lg transition-all duration-200"
+                      aria-label="Delete report"
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            duration={toast.duration}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
       </div>
     </div>
   );

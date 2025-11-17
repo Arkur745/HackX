@@ -64,9 +64,9 @@ const Home = () => {
                 AI Health Assistant
               </h3>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                Chat via voice or text with our intelligent AI health assistant.
-                Get instant answers to your health questions in English or
-                Hindi, 24/7.
+                Chat via voice or text with our intelligent AI powered by
+                HealX.ai. Get instant answers to your health questions in
+                English or Hindi, 24/7.
               </p>
             </div>
 
@@ -181,7 +181,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="py-8 px-4 bg-white dark:bg-zinc-950 text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-zinc-800 transition-colors duration-300">
         <div className="max-w-6xl mx-auto text-center">
-          <p>&copy; 2025 HealthAI. All rights reserved.</p>
+          <p>&copy; 2025 HealX.ai. All rights reserved.</p>
         </div>
       </footer>
     </div>

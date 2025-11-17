@@ -41,8 +41,8 @@ const Navbar = () => {
               </svg>
             </div>
             <div className="text-xl font-bold">
-              <span className="text-foreground">Health</span>
-              <span className="text-muted-foreground">AI</span>
+              <span className="text-foreground">HealX</span>
+              <span className="text-muted-foreground">.ai</span>
             </div>
           </Link>
 

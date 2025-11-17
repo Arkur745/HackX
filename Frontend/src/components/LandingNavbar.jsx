@@ -33,7 +33,7 @@ const LandingNavbar = () => {
               </svg>
             </div>
             <span className="text-xl font-bold text-black dark:text-white hidden sm:block">
-              HealthAI
+              HealX.ai
             </span>
           </Link>
 

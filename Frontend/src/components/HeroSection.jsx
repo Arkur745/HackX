@@ -12,7 +12,7 @@ const HeroSection = () => {
       <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-gray-300 dark:border-white/20 bg-gray-100/80 dark:bg-white/5 backdrop-blur-sm animate-fade-in">
         <Bot className="w-4 h-4" />
         <span className="text-sm font-medium">
-          AI-Powered Digital Health Assistant
+          HealX.ai - AI-Powered Health Assistant
         </span>
       </div>
 

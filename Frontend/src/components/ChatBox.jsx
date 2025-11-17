@@ -6,8 +6,15 @@ import ChatSidebar from "./ChatSidebar";
 import { Menu, X } from "lucide-react";
 
 const ChatBox = () => {
-  const { messages, isTyping, error, sendMessage, clearError } =
-    useChatContext();
+  const {
+    messages,
+    isTyping,
+    error,
+    isInitialized,
+    loadConversations,
+    sendMessage,
+    clearError,
+  } = useChatContext();
 
   const [inputText, setInputText] = useState("");
   const [showVoiceInput, setShowVoiceInput] = useState(false);
@@ -15,6 +22,14 @@ const ChatBox = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Load conversations when ChatBox mounts (when user actually visits chat tab)
+  useEffect(() => {
+    if (!isInitialized) {
+      console.log("📱 ChatBox mounted - loading conversations now");
+      loadConversations();
+    }
+  }, [isInitialized, loadConversations]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -107,7 +122,7 @@ const ChatBox = () => {
 
             <div>
               <h2 className="text-lg font-semibold text-foreground">
-                Health Assistant
+                HealX.ai Assistant
               </h2>
               <p className="text-xs text-muted-foreground">
                 Your AI health companion
@@ -278,12 +293,41 @@ const ChatBox = () => {
             <button
               onClick={handleSendMessage}
               disabled={!inputText.trim() || isTyping}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               aria-label="Send message"
             >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
+              {isTyping ? (
+                // Loading spinner
+                <svg
+                  className="w-6 h-6 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              ) : (
+                // Send icon
+                <svg
+                  className="w-6 h-6"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
+              )}
             </button>
 
             {/* Stop Speaking Button (shown when TTS is active) */}

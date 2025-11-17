@@ -2,12 +2,13 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { reportAPI } from "../services/api";
 
-const ReportViewer = ({ report }) => {
+const ReportViewer = ({ report, onDownload, showToast }) => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [explanation, setExplanation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState("en");
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const handleExplain = async () => {
     setLoading(true);
@@ -30,10 +31,42 @@ const ReportViewer = ({ report }) => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = language === "hi" ? "hi-IN" : "en-US";
+
+      // Set speaking state
+      setIsSpeaking(true);
+
+      // Handle when speech ends
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
+
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+      };
+
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("Text-to-speech is not supported in this browser.");
+      if (showToast) {
+        showToast(
+          "Text-to-speech is not supported in this browser.",
+          "warning"
+        );
+      } else {
+        alert("Text-to-speech is not supported in this browser.");
+      }
     }
+  };
+
+  const stopSpeaking = () => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  const closeModal = () => {
+    stopSpeaking(); // Stop any ongoing speech
+    setShowExplanation(false);
   };
 
   return (
@@ -143,15 +176,20 @@ const ReportViewer = ({ report }) => {
           )}
         </button>
 
-        {report.fileUrl && (
-          <a
-            href={report.fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary"
+        {report.fileUrl && onDownload && (
+          <button
+            onClick={() => onDownload(report)}
+            className="btn-secondary flex items-center gap-2"
           >
-            View Original
-          </a>
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Download Report
+          </button>
         )}
       </div>
 
@@ -164,10 +202,7 @@ const ReportViewer = ({ report }) => {
 
       {/* Explanation Modal */}
       {showExplanation && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowExplanation(false)}
-        >
+        <div className="modal-overlay" onClick={closeModal}>
           <div
             className="bg-card shadow-soft rounded-xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto transition-all duration-300"
             onClick={(e) => e.stopPropagation()}
@@ -178,7 +213,7 @@ const ReportViewer = ({ report }) => {
                 Simple Explanation
               </h2>
               <button
-                onClick={() => setShowExplanation(false)}
+                onClick={closeModal}
                 className="p-2 hover:bg-secondary/50 rounded-lg transition-colors duration-200"
               >
                 <svg
@@ -206,28 +241,45 @@ const ReportViewer = ({ report }) => {
 
             {/* Modal Actions */}
             <div className="flex gap-3">
-              <button
-                onClick={() => speakExplanation(explanation)}
-                className="btn-secondary flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+              {!isSpeaking ? (
+                <button
+                  onClick={() => speakExplanation(explanation)}
+                  className="btn-secondary flex items-center gap-2"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Listen
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Listen
+                </button>
+              ) : (
+                <button
+                  onClick={stopSpeaking}
+                  className="btn-secondary flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Stop Listening
+                </button>
+              )}
 
-              <button
-                onClick={() => setShowExplanation(false)}
-                className="btn-primary flex-1"
-              >
+              <button onClick={closeModal} className="btn-primary flex-1">
                 Close
               </button>
             </div>
@@ -248,7 +300,10 @@ ReportViewer.propTypes = {
     date: PropTypes.string,
     createdAt: PropTypes.string,
     fileUrl: PropTypes.string,
+    reportName: PropTypes.string,
   }).isRequired,
+  onDownload: PropTypes.func,
+  showToast: PropTypes.func,
 };
 
 export default ReportViewer;

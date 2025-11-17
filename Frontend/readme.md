@@ -1,6 +1,6 @@
-# Voice and Chat-Based Digital Health Assistant - Frontend
+# HealX.ai - Voice and Chat-Based Health Assistant - Frontend
 
-A modern, minimalist React-based frontend for a digital health assistant application. Built with Vite, React Router, TailwindCSS, and featuring voice-enabled chat capabilities.
+A modern, minimalist React-based frontend for HealX.ai health assistant application. Built with Vite, React Router, TailwindCSS, and featuring voice-enabled chat capabilities.
 
 ## 🎨 Design Philosophy
 

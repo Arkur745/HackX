@@ -180,7 +180,18 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
     setLoading(true);
 
     try {
-      const response = await appointmentAPI.createAppointment(formData);
+      // Transform form data to match backend expected format
+      const appointmentData = {
+        fullName: formData.name,
+        email: formData.email,
+        phoneNumber: formData.phone,
+        department: formData.department,
+        preferredDoctor: formData.doctor || "Any",
+        datetime: `${formData.date}T${formData.time}:00`, // Combine date and time into ISO format
+        additionalNotes: formData.notes,
+      };
+
+      const response = await appointmentAPI.createAppointment(appointmentData);
       console.log("Appointment created:", response.data);
       onSuccess?.(response.data);
 
@@ -198,7 +209,8 @@ const AppointmentForm = ({ onSuccess, onCancel }) => {
     } catch (err) {
       console.error("Error creating appointment:", err);
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.error ||
+          err.response?.data?.message ||
           "Failed to create appointment. Please try again."
       );
     } finally {
